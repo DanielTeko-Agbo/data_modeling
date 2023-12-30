@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15.0
+    restart: always
+    volumes:
+      - ./postgres-data:/var/lib/postgres/pg_data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  run:
+    build: .
+    image: data_modeling:1.0
+    container_name: dataModel
+    volumes:
+      - .:/var/www/html/data-modeling
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python src/main.py
+    
